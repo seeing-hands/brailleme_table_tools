@@ -2,7 +2,7 @@
 # This script is designed to regress a LibLouis table to an older version, specifically so that it can run on the Braille Me
 # Note: This is an experimental script. There are many tables it won't work on, because functionality is only added as needed
 # There is no support for this software.
-
+import argparse
 import sys
 import subprocess
 import os
@@ -31,7 +31,7 @@ def convert_table(input_fn):
 
 def main(argv):
     args = argparse.ArgumentParser(
-        description="Convert a modern LibLouis table to a BrailleMe-compatible version",
+        description="Convert a modern LibLouis table to a BrailleMe-compatible version")
     args.add_argument("-i", "--input",
         help="The path to a table to be converted", action="store", required=True)
     args.add_argument("-o", "--output",
@@ -41,19 +41,19 @@ def main(argv):
     args.add_argument("--lou-checktable-path",
         help="The path to the lou_checktable binary used for verification.",
         default="liblouis/lou_checktable")
-    args.parse_args(argv)
-    output_file_lines = convert_table(self.input)
-    with open(args.output, encoding="utf-8") as f:
+    config = args.parse_args()
+    output_file_lines = convert_table(config.input)
+    with open(config.output, "w", encoding="utf-8") as f:
         f.write(format_warning)
         for l in output_file_lines:
             f.write(l)
 
-    if args.skip_verify:
+    if config.skip_verify:
         sys.exit(1)
-    verify_code = subprocess.call([args.lou_checktable_path, args.output])
+    verify_code = subprocess.call([config.lou_checktable_path, config.output])
     if verify_code != 0:
         print("Table has errors. Deleting generated version.")
-        os.remove(args.output)
+        os.remove(config.output)
         sys.exit(-1)
 
 
